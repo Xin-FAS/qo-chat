@@ -1,6 +1,11 @@
 # 简介
 这是一个vue3+vite+ts的项目
 
+# 开始
+
+1. pnpm i
+2. pnpm dev
+
 # 目前用到的所有小玩意
 1. normalize.css
 2. tailwindcss

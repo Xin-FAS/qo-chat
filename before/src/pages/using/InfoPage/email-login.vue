@@ -1,19 +1,16 @@
 <script setup lang='ts'>
-import { 
-    Lock,
-    Message as ElMessage,
-    Connection
-} from '@element-plus/icons-vue'
+// Message取个别名，和不知名的地方重复了
+import { Message as ElMessage, Connection } from '@element-plus/icons-vue'
+const emit = defineEmits(['back'])
 
-const emit = defineEmits<{
-    (name: 'back'): void
-}>()
+
+// 账号
 </script>
+
 <template>
-    <el-form
-        size="large"
-        ref="formRef">
+   <el-form class="form-content">
         <el-form-item
+            size="large"
             v-motion
             :initial="{
                 opacity: 0,
@@ -24,7 +21,7 @@ const emit = defineEmits<{
                 y: 0,
                 transition: {
                     type: 'spring',
-                    mass: 0.6
+                    mass: 0.6,
                 },
             }">
             <el-input
@@ -33,6 +30,7 @@ const emit = defineEmits<{
             />
         </el-form-item>
         <el-form-item
+            size="large"
             v-motion
             :initial="{
                 opacity: 0,
@@ -70,13 +68,7 @@ const emit = defineEmits<{
                     delay: 80
                 },
             }">
-            <el-input
-                clearable
-                type="password"
-                show-password
-                placeholder="密码"
-                :prefix-icon="Lock"
-            />
+            <el-button class="w-full" type="primary">登录</el-button>
         </el-form-item>
         <el-form-item
             v-motion
@@ -93,59 +85,24 @@ const emit = defineEmits<{
                     delay: 120
                 },
             }">
-            <el-input
-                clearable
-                type="password"
-                show-password
-                placeholder="确认密码"
-                :prefix-icon="Lock"
-            />
-        </el-form-item>
-        <el-form-item
-            v-motion
-            :initial="{
-                opacity: 0,
-                y: 150,
-            }"
-            :enter="{
-                opacity: 1,
-                y: 0,
-                transition: {
-                    type: 'spring',
-                    mass: 0.6,
-                    delay: 160
-                },
-            }">
-            <el-button
-                class="w-full"
-                size="default"
-                type="primary">
-                确定
-            </el-button>
-        </el-form-item>
-        <el-form-item
-            v-motion
-            :initial="{
-                opacity: 0,
-                y: 150,
-            }"
-            :enter="{
-                opacity: 1,
-                y: 0,
-                transition: {
-                    type: 'spring',
-                    mass: 0.6,
-                    delay: 200
-                },
-            }">
-            <el-button
-                class="w-full"
-                size="default"
-                @click="emit('back')">
-                返回
-            </el-button>
+            <el-button class="w-full" @click="emit('back')">返回</el-button>
         </el-form-item>
     </el-form>
 </template>
 <style scoped lang='scss'>
+.form-content {
+    .more-login {
+        @apply
+        flex
+        w-full
+        justify-around;
+
+        > svg {
+            @apply
+            text-[#666]
+            hover:text-[#60a5fa]
+            cursor-pointer;
+        }
+    }
+}
 </style>

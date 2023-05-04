@@ -4,6 +4,7 @@ import loginTitleBg from '@/assets/img/login-title-bg.png'
 import loginTitlePrev from '@/assets/img/login-title-prev.png'
 import PwdLoginForm from './pwd-login-form.vue';
 import PhoneLoginForm from './phone-login-form.vue';
+import EmailLogin from './email-login.vue';
 import CodeLogin from './code-login.vue';
 import RegisterForm from './register-form.vue';
 import ForgetForm from './forget-form.vue';
@@ -27,7 +28,8 @@ type FormState =
     'phoneLogin' | 
     'codeLogin' | 
     'register' |
-    'forget'
+    'forget' |
+    'email'
 
 const formState = ref<FormState>('pwdLogin')
 // 切换表单状态
@@ -80,11 +82,13 @@ const hasTokenHandler = () => {
                     @to-code="setFormState('codeLogin')"
                     @to-register="toRegister"
                     @to-forget="setFormState('forget')"
+                    @to-email="setFormState('email')"
                 />
                 <PhoneLoginForm v-if="formState==='phoneLogin'" @back="setFormState('pwdLogin')"/>
                 <CodeLogin v-if="formState==='codeLogin'" @back="setFormState('pwdLogin')"/>
                 <RegisterForm v-if="formState==='register'" @back="registerBack"/>
                 <ForgetForm v-if="formState==='forget'" @back="setFormState('pwdLogin')"/>
+                <EmailLogin v-if="formState==='email'" @back="setFormState('pwdLogin')"/>
         </section>
    </div>
 </template>
@@ -101,7 +105,8 @@ const hasTokenHandler = () => {
     px-[32px]
     gap-[200px]
     xl:gap-[300px]
-    items-center;
+    items-center
+    overflow-hidden;
 
     .login-icon {
         @apply

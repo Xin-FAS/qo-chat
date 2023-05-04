@@ -2,7 +2,7 @@
 import { 
     User,
     Lock,
-    Iphone,
+    Message as ElMessage,
     Connection
 } from '@element-plus/icons-vue'
 
@@ -50,8 +50,8 @@ const emit = defineEmits<{
                 },
             }">
             <el-input
-                placeholder="手机号码"
-                :prefix-icon="Iphone"
+                placeholder="邮箱号码"
+                :prefix-icon="ElMessage"
             />
         </el-form-item>
         <el-form-item
@@ -71,7 +71,7 @@ const emit = defineEmits<{
             }">
             <div class="flex w-full h-full">
                 <el-input
-                    placeholder="短信验证码"
+                    placeholder="邮箱验证码"
                     :prefix-icon="Connection"
                 />
                 <el-button class="ml-[10px]">获取验证码</el-button>

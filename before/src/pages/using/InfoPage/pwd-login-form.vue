@@ -17,13 +17,12 @@ import { setToken } from '@/utils/handler-token'
 
 const router = useRouter()
 const toast = useToast()
-// 记住密码
-const isRemember = ref(false)
 const emit = defineEmits<{
     (name: 'toPhone'): void,
     (name: 'toCode'): void,
-    (name: 'toRegister'): void
-    (name: 'toForget'): void
+    (name: 'toRegister'): void,
+    (name: 'toForget'): void,
+    (name: 'toEmail'): void
 }>()
 // 登录表单
 const formData = reactive<BaseForm>({
@@ -158,7 +157,7 @@ const login = () => {
                 },
             }">
             <div class="remember-forget">
-                <el-checkbox v-model="isRemember" label="记住密码" />
+                <el-link type="primary" :underline="false" @click="emit('toRegister')">没有账号？立即注册</el-link>
                 <el-link type="primary" :underline="false" @click="emit('toForget')">忘记密码?</el-link>
             </div>
             <el-button
@@ -186,7 +185,7 @@ const login = () => {
             <div class="flex justify-between w-full h-[20px]">
                 <el-button class="flex-1" @click="emit('toPhone')">手机登录</el-button>
                 <el-button class="flex-1" @click="emit('toCode')">二维码登录</el-button>
-                <el-button class="flex-1" @click="emit('toRegister')">注册</el-button>
+                <el-button class="flex-1" @click="emit('toEmail')">邮箱登录</el-button>
             </div>
         </el-form-item>
         <el-form-item
