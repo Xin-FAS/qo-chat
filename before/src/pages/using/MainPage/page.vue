@@ -14,7 +14,7 @@ import LeftMenu from './left-menu.vue'
                     mode="out-in"
                     enter-active-class="animate__animated animate__fadeInLeft animate__faster"
                     leave-active-class="animate__animated animate__fadeOutLeft animate__faster">
-                    <component :is="Component" />
+                    <component :is="Component" style="background-color: rgb(247, 247, 247)"/>
                 </transition>
             </router-view>
         </div>

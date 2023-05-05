@@ -4,24 +4,27 @@ import { Menu, Expand, Fold } from '@element-plus/icons-vue'
 import { Icon } from '@iconify/vue';
 import { useRoute } from 'vue-router'
 import MenuMore from './menu-more.vue'
+import { useDebounce } from '@/utils/useDebounce'
 
 const route = useRoute()
 // 侧边栏是否关闭
-const isCollapse = ref(false)
+const isCollapse = ref(true)
 // 侧边栏铺平模式
 const isPave = ref(true)
+
 // 监听屏幕大小变化
-const changeSide = () => {
+const handlerSide = () => {
     const clientWidth = document.documentElement.clientWidth
     const isXl = clientWidth >= 1024
-    if (isCollapse.value === !isXl) return
     setCollapse(!isXl, () => {
         isPave.value = !isXl
     })
 }
+const changeSide = useDebounce(handlerSide)
+
 onMounted(() => {
     window.addEventListener('resize', changeSide)
-    changeSide()
+    handlerSide()
 })
 onUnmounted(() => {
     window.removeEventListener('resize', changeSide)
@@ -66,12 +69,6 @@ const changeCollapse = () => {
             </el-icon>
             <template #title>聊天列表</template>
         </el-menu-item>
-        <el-menu-item index="/using/chat-gpt">
-            <el-icon>
-                <Icon icon="mdi:robot-confused" />
-            </el-icon>
-            <template #title>ChatGPT</template>
-        </el-menu-item>
         <el-menu-item index="/using/chat-user">
             <el-icon>
                 <Icon icon="mdi:user" />
@@ -83,6 +80,12 @@ const changeCollapse = () => {
                 <Icon icon="material-symbols:group-rounded" />
             </el-icon>
             <template #title>群组</template>
+        </el-menu-item>
+        <el-menu-item index="/using/chat-gpt">
+            <el-icon>
+                <Icon icon="mdi:robot-confused" />
+            </el-icon>
+            <template #title>ChatGPT</template>
         </el-menu-item>
         <MenuMore v-if="isPave"/>
         <transition

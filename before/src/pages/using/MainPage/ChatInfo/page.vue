@@ -2,7 +2,7 @@
 
 </script>
 <template>
-   <div>
+    <div class="flex-1">
        该网站用于FAS的毕业设计，此版本为静态网页，请等待后续添加
    </div>
 </template>

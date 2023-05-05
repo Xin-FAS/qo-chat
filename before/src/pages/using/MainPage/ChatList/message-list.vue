@@ -43,9 +43,9 @@ const demoList = ref<UserChat[]>([
 </script>
 <template>
     <!-- 消息列表 -->
-    <div class="flex-1 overflow-auto bg-[#e8e6e6]">
+    <div class="h-full overflow-auto bg-[#e8e6e6]">
         <div
-            class="h-[70px] px-[10px] flex items-center cursor-default hover:bg-[#cac8c7]"
+            class="h-[70px] px-[10px] flex items-center cursor-default hover:bg-[#cac8c7] transition-all duration-150"
             :class="{
                 'isSelected': selectListId === chatItem.chatId
             }"

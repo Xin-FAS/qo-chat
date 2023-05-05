@@ -4,6 +4,7 @@ import MessageList from './message-list.vue'
 import ChatContent from '@/components/chat-content.vue'
 import { Search } from '@element-plus/icons-vue'
 import type { UserChat } from '@/constant/types'
+import { useDebounce } from '@/utils/useDebounce'
 
 // 搜索框
 const searchValue = ref('')
@@ -24,18 +25,6 @@ const clickMenu = () => {
 }
 
 const isSm = ref(true)
-
-// 创建防抖
-const useDebounce = <T, >(cb: (arg: T) => void, delay: number = 50) => {
-    let time: ReturnType<typeof setTimeout> | undefined;
-    return (arg: T) => {
-        time && clearTimeout(time)
-        time = setTimeout(() => {
-            time = undefined
-            cb(arg)
-        }, delay)
-    }
-}
 
 // 监听屏幕大小变化
 const changeSide = () => {
@@ -67,7 +56,7 @@ const drawerModel = ref(false)
                 <el-input
                     v-model="searchValue"
                     size="large"
-                    class="bg-[#f1f1f1] ml-[10px]"
+                    class="ml-[10px]"
                     placeholder="好友昵称（Enter）"
                     :prefix-icon="Search"
                     clearable
@@ -81,13 +70,14 @@ const drawerModel = ref(false)
             mode="out-in"
             enter-active-class="animate__animated animate__fadeIn animate__faster"
             leave-active-class="animate__animated animate__fadeOut animate__faster">
-            <ChatContent
-                v-if="isSm"
-                :key="chatRoomKey"
-                :data="openList"
-                @click-menu="clickMenu" 
-                :is-mobile="false"
-            />
+            <div class="flex-1" v-if="isSm">
+                <ChatContent
+                    :key="chatRoomKey"
+                    :data="openList"
+                    @click-menu="clickMenu" 
+                    :is-mobile="false"
+                />
+            </div>
         </transition>
         <!-- 移动端聊天窗口 -->
         <el-drawer

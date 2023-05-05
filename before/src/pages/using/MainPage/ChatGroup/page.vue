@@ -2,7 +2,7 @@
 
 </script>
 <template>
-   <div>
+   <div class="flex-1">
        请等待后续开放
    </div>
 </template>

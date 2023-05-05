@@ -21,8 +21,7 @@ const directivesModel = import.meta.glob('@/directives/*.ts')
 for (const file in directivesModel) {
     const fileName = basename(file, false)
     const fileContent = directivesModel[file]() as Promise<{ default: object }>
-    const importModel = await fileContent.then(res => res.default)
-    app.directive(fileName, importModel)
+    app.directive(fileName, await fileContent.then(res => res.default))
 }
 // 弹窗默认配置
 const toastOptions: PluginOptions = {

@@ -14,7 +14,7 @@ const props = defineProps<{
     isMobile: boolean
 }>()
 // 聊天记录加载状态
-const isLoading = ref(false)
+const isLoading = ref(true)
 // 等待状态, true 未选择聊天
 const isNoSelected = ref(true)
 
@@ -24,7 +24,7 @@ const getChatRecord = () => {
     isNoSelected.value = !props.data
     // 未选择
     if (!props.data) return
-    isLoading.value = true
+    // isLoading.value = true
     // TODO 异步请求获取聊天数据
     setTimeout(() => {
         chatContent.value = [
@@ -175,7 +175,7 @@ const selectedEmo = (emo: string) => {
 }
 </script>
 <template>
-    <div class="flex flex-1 flex-col">
+    <div class="flex w-full h-full flex-col">
         <!-- 聊天窗口头部 -->
         <div class="chat-head" v-hammer="{ swipedown }">
             <!-- 左侧收缩 -->
@@ -198,8 +198,8 @@ const selectedEmo = (emo: string) => {
                 </div>
             </div>
         </div>
-        <div class="flex flex-col flex-1 min-h-0 bg-gray-100" v-loading="isLoading">
-            <div class="flex-1 min-h-0" v-show="!isNoSelected">
+        <div class="flex flex-col flex-1 min-h-0 bg-gray-100" v-loading="isLoading" v-show="!isNoSelected">
+            <div class="flex-1 min-h-0">
                 <ChatRoom
                     :themeMode="themeMode"
                     :chat-content="chatContent"
@@ -208,7 +208,7 @@ const selectedEmo = (emo: string) => {
                     @loadMore="loadMore"
                 />
             </div>
-            <div class="h-auto flex flex-col sm:h-[230px]" v-show="!isNoSelected">
+            <div class="h-auto flex flex-col sm:h-[230px]">
                 <div class="flex items-center p-[5px]">
                     <!-- 表情模块 -->
                     <emojipedia @selected="selectedEmo"/>
@@ -217,6 +217,9 @@ const selectedEmo = (emo: string) => {
                     <ChatInput ref="chatInputRef" @send="send"/>
                 </div>
             </div>
+        </div>
+        <div class="h-full w-full flex justify-center items-center bg-gray-100" v-if="isNoSelected">
+            <img src="@/assets/img/icon.png" class="w-[70px] h-[70px] opacity-30" alt="">
         </div>
     </div>
 </template>
@@ -229,7 +232,6 @@ const selectedEmo = (emo: string) => {
     flex
     justify-center
     items-end;
-    background: linear-gradient(90deg, #F7F7F7 0%,#FFFFFF 10%);
 
     .chat-head-left {
         @apply

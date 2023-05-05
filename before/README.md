@@ -7,18 +7,19 @@
 2. pnpm dev
 
 # 目前用到的所有小玩意
-1. normalize.css
-2. tailwindcss
-3. vue-router
-4. @vueuse/motion
-5. animate.css
-6. iconify
-7. element-plus
-8. element-plus/icons
-9. swiper
-10. md5
-11. crypto-js
-12. vue-toastification
-13. hammer-js
-14. nanoid
-15. axios
+1. normalize.css（样式初始化）
+2. tailwindcss（样式库）
+3. vue-router（vue官方路由）
+4. @vueuse/motion（motion动画库）
+5. animate.css（animate动画库）
+6. iconify（免费商用图标）
+7. element-plus（EP组件）
+8. element-plus/icons（EP组件图标）
+9. swiper（轮播组件）
+10. md5（md5加密）
+11. crypto-js（aes加密以及解密）
+12. vue-toastification（通知组件）
+13. hammer-js（手势组件）
+14. nanoid（代替uuid）
+15. axios（请求）
+16. pinyin-pro（汉字操作拼音）
