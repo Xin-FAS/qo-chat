@@ -7,6 +7,7 @@ import "tailwindcss/tailwind.css"
 import 'animate.css'
 import basename from '@/utils/basename'
 import Toast, { PluginOptions, POSITION } from "vue-toastification";
+import { createPinia } from 'pinia'
 // Import the CSS or use your own!
 import "vue-toastification/dist/index.css";
 // 解决tailwind对el组件样式的覆盖问题
@@ -26,10 +27,13 @@ for (const file in directivesModel) {
 // 弹窗默认配置
 const toastOptions: PluginOptions = {
     position: POSITION.TOP_CENTER,
+    timeout: 1500,
     showCloseButtonOnHover: true
 }
+
 app
     .use(Toast, toastOptions)
     .use(router)
     .use(MotionPlugin)
+    .use(createPinia())
     .mount('#app')

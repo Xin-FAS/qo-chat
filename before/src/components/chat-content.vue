@@ -1,111 +1,75 @@
 <script setup lang='ts'>
-import type { UserChat, ChatContent } from '@/constant/types'
+import type { ChatData, GetGroupMsgResp, MessageList } from '@/constant/types'
 import ChatRoom from './chat-room.vue'
 import ChatInput from './chat-input.vue'
 import { Icon } from '@iconify/vue'
 import { onBeforeMount, ref } from 'vue'
-import avatar from '@/assets/img/avatar.jpg'
-import moment from 'moment'
 import { handlerTime } from '@/utils/moment'
 import emojipedia from '@/components/emojipedia.vue'
+import { useUserStore } from '@/pinia/user'
+import { GetChatData, GetChatDataAll, GetGroupAllRecord, GetGroupRecord, Send, SendToGroup } from '@/axios/user'
+import { useInterval } from '@/utils/useInterval'
+import { useSettingStore } from '@/pinia/setting'
+import { getToken } from '@/utils/handler-token'
+import { UploadProps } from 'element-plus'
+import { AxiosResponse } from 'axios'
+import { useToast } from 'vue-toastification'
 
+
+const toast = useToast()
+const userStore = useUserStore()
+const settingStore = useSettingStore()
 const props = defineProps<{
-    data: UserChat | undefined,
+    data: MessageList | GetGroupMsgResp | undefined,
+    isGroup: boolean,
     isMobile: boolean
 }>()
+// 当前页
+const current = ref(1)
 // 聊天记录加载状态
 const isLoading = ref(true)
 // 等待状态, true 未选择聊天
-const isNoSelected = ref(true)
+const isNoSelected = ref(false)
 
-// 根据列表信息获取聊天记录
-const getChatRecord = () => {
-    console.log('刷新获取聊天记录', { ...props.data })
-    isNoSelected.value = !props.data
-    // 未选择
-    if (!props.data) return
-    // isLoading.value = true
-    // TODO 异步请求获取聊天数据
-    setTimeout(() => {
-        chatContent.value = [
-            {
-                id: 1,
-                type: 'text',
-                text: '测试消息测试消息测试消息测试消息测试消息测试消息测试消息',
-                time: '2022-03-01T14:00:00',
-                userInfo: {
-                    userId: 1,
-                    username: '测试用户',
-                    nickname: '用户昵称1',
-                    avatar,
-                    sex: '0'
-                }
-            },
-            {
-                id: 2,
-                type: 'text',
-                text: '测试消息测试消息测试消息测试消息测试消息测试消息测试消息',
-                time: '2022-03-01T14:00:00',
-                userInfo: {
-                    userId: 2,
-                    username: '测试用户',
-                    nickname: '用户昵称1',
-                    avatar,
-                    sex: '0'
-                }
-            },
-            {
-                id: 3,
-                type: 'text',
-                text: '测试消息测试消息测试消息测试消息测试消息测试消息测试消息',
-                time: '2022-03-01T14:00:00',
-                userInfo: {
-                    userId: 2,
-                    username: '测试用户',
-                    nickname: '用户昵称1',
-                    avatar,
-                    sex: '0'
-                }
-            },
-            {
-                id: 4,
-                type: 'text',
-                text: '测试消息测试消息测试消息测试消息测试消息测试消息测试消息',
-                time: '2022-03-01T14:00:00',
-                userInfo: {
-                    userId: 2,
-                    username: '测试用户',
-                    nickname: '用户昵称1',
-                    avatar,
-                    sex: '0'
-                }
-            },
-            {
-                id: 5,
-                type: 'text',
-                text: '测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息',
-                time: '2022-03-01T14:00:00',
-                userInfo: {
-                    userId: 4,
-                    username: '测试用户3',
-                    nickname: '用户昵称3',
-                    avatar,
-                    sex: '0'
-                }
-            }
-        ]
+// 获取下一页数据
+const getMoreData = () => {
+    return !props.isGroup ? 
+        GetChatData(current.value + 1, (props.data as MessageList).user.qoNum) :
+        GetGroupRecord(current.value + 1, (props.data as GetGroupMsgResp).groupNum)
+}
+// 根据页数获取数据
+const getAllData = () => {
+    return !props.isGroup ? 
+        GetChatDataAll(current.value, (props.data as MessageList).user.qoNum) :
+        GetGroupAllRecord(current.value, (props.data as GetGroupMsgResp).groupNum)
+}
+// 轮询获取聊天数据（全部）
+const intervalGetData = () => {
+    getAllData().then(data => {
         isLoading.value = false
-    }, 2000)
+        chatContent.value = data
+    })
+}
+const { stopInterval, startInterval } = useInterval(1000, intervalGetData)
+// 根据列表信息获取聊天记录
+const getChatRecord = async () => {
+    // 未选择
+    if (!props.data) return isNoSelected.value = true
+    console.log('刷新获取聊天记录', { ...props.data })
+    // isLoading.value = true
+    // 建立轮询
+    startInterval()
 }
 
 const emits = defineEmits<{
-    (name: 'clickMenu' | 'swipedown'): void
+    (name: 'clickMenu' | 'swipedown'): void,
+    (name: 'sendUrl', content: string): void
 }>()
 
 // 主题环境
-const themeMode = ref<'dark' | 'light'>('light')
+const themeMode = ref<'dark' | 'light'>(settingStore.isDark ? 'dark': 'light')
 
-const chatContent = ref<ChatContent[]>([])
+const chatContent = ref<ChatData[]>([])
 onBeforeMount(() => {
     getChatRecord()
 })
@@ -113,46 +77,32 @@ onBeforeMount(() => {
 const clickAvatar = (data: any) => {
     console.log(data)
 }
-// 模拟数据
-const createData = () => {
-    return {
-        id: Math.round(Math.random() * 10000),
-        type: 'text',
-        text: '测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长测试超长',
-        time: '2022-10-10T12:12:12',
-        userInfo: {
-            userId: Math.round(Math.random()) + 1,
-            username: '测试用户2',
-            nickname: '测试用户2',
-            avatar,
-            sex: '0'
-        }
-    }
-}
 // 加载更多
 const loadMore = () => {
-    const arr: any = []
-    for (let i = 0; i < 10; i++) {
-        arr.push(createData())
-    }
-    setTimeout(() => {
-        chatContent.value = [...arr, ...chatContent.value]
-    }, 1000)
+    // 停止轮询
+    stopInterval()
+    // 获取上一页的数据
+    getMoreData().then(res => {
+        chatContent.value = [...res, ...chatContent.value]
+        // 继续使用轮询发送
+        startInterval()
+        if (!res.length) return
+        current.value++
+    })
 }
-// 模拟发送
-const send = (value: string) => {
-    chatContent.value.push({
-        id: Math.round(Math.random() * 10000),
-        type: 'text',
-        text: value,
-        time: moment().format('YYYY-MM-DDTHH:mm:ss'),
-        userInfo: {
-            userId: Math.round(Math.random()) + 1,
-            username: '测试用户2',
-            nickname: '测试用户2',
-            avatar,
-            sex: '0'
-        }
+const chatRoomRef = ref()
+// 发送
+const send = (value: string, type: 'text' | 'image') => {
+    props.isGroup ? 
+    SendToGroup({
+        toGroup: (props.data as GetGroupMsgResp).groupNum,
+        recordContent: value,
+        recordType: type
+    }): 
+    Send({
+        toUser: (props.data as MessageList).user.qoNum,
+        recordContent: value,
+        recordType: type
     })
 }
 // 当前消息列表状态
@@ -173,6 +123,21 @@ const selectedEmo = (emo: string) => {
     console.log(emo, '选择了')
     chatInputRef.value.insertTo(emo)
 }
+
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile: File) => {
+    if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
+        toast.error('图片格式必须为jpg或png！')
+        return false
+    } else if (rawFile.size / 1024 / 1024 > 2) {
+        toast.error('图片大小不能超过2MB！')
+        return false
+    }
+    return true
+}
+const handleAvatarSuccess: UploadProps['onSuccess'] = ({ data }: AxiosResponse) => {
+    const path = '../' + data.url.split('\\src\\')[1]
+    send(new URL(path, import.meta.url).href, 'image')
+}
 </script>
 <template>
     <div class="flex w-full h-full flex-col">
@@ -188,33 +153,53 @@ const selectedEmo = (emo: string) => {
             </div>
             <!-- 聊天对象 -->
             <div class="pointer-events-none text-center flex items-center" v-if="!isNoSelected">
-                <el-avatar shape="square" :size="40" class="mr-[10px]" :src="data?.avatar" />
+                <el-avatar
+                    shape="square"
+                    :size="40"
+                    class="mr-[10px]"
+                    :src="isGroup ? (data as GetGroupMsgResp).groupAvatar : (data as MessageList).user.avatar"
+                />
                 <div>
                     <p class="text-[15px] flex items-center">
-                        <span>{{ data?.nickname }}</span>
+                        <span>{{ isGroup ? (data as GetGroupMsgResp).groupName : (data as MessageList).user.nickname }}</span>
                         <Icon icon="tabler:message-chatbot" class="ml-[5px]" color="#333" width="17" />
                     </p>
-                    <p class="text-[10px]">{{ handlerTime(data?.time || '') }}</p>
+                    <p class="text-[10px]">{{ handlerTime(data?.record.createTime || '') }}</p>
                 </div>
             </div>
         </div>
         <div class="flex flex-col flex-1 min-h-0 bg-gray-100" v-loading="isLoading" v-show="!isNoSelected">
             <div class="flex-1 min-h-0">
                 <ChatRoom
+                    ref="chatRoomRef"
                     :themeMode="themeMode"
                     :chat-content="chatContent"
-                    :user-id="1"
+                    :qo-num="userStore.user.qoNum"
                     @clickAvatar="clickAvatar"
                     @loadMore="loadMore"
                 />
             </div>
             <div class="h-auto flex flex-col sm:h-[230px]">
-                <div class="flex items-center p-[5px]">
+                <div class="flex items-center p-[5px]" :style="{
+                    '--el-color-primary': 'transparent'
+                }">
                     <!-- 表情模块 -->
                     <emojipedia @selected="selectedEmo"/>
+                    <el-upload
+                        class="flex items-center"
+                        :show-file-list="false"
+                        action="/api/user/upload"
+                        :on-success="handleAvatarSuccess"
+                        :before-upload="beforeAvatarUpload"
+                        :headers="{
+                            token: getToken() || ''
+                        }"
+                    >
+                        <Icon icon="ph:image-light" class="ml-[5px] p-[5px] text-[31px] focus:bg-[#d8dbdd] hover:bg-[#d8dbdd] transition-[background] rounded-[5px]" color="#1b1b1c" />
+                    </el-upload>
                 </div>
                 <div class="flex-1">
-                    <ChatInput ref="chatInputRef" @send="send"/>
+                    <ChatInput ref="chatInputRef" @send="value => send(value, 'text')"/>
                 </div>
             </div>
         </div>

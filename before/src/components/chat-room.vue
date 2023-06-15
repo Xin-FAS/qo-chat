@@ -10,32 +10,46 @@ import {
 import moment, { handlerTime, isShowAbs } from '@/utils/moment'
 import { nanoid } from 'nanoid'
 
-interface ChatUser {
-    userId: number;
-    username: string;
+type LogicSelect = '0' | '1'
+type recordType = 'text' | 'image'
+
+// 基础用户
+interface User {
+    qoNum: string;
+    avatar: string | undefined;
+    password: string;
     nickname: string;
-    avatar: string;
-    sex: '0' | '1';
+    phone: string | undefined;
+    email: string | undefined;
+    sex: LogicSelect | undefined;
+    description: string | undefined;
+    createTime: string;
+    updateTime: string;
+    delLogic: LogicSelect;
+}
+// 消息
+interface Record {
+    recordId: number;
+    recordUser: string;
+    recordContent: string;
+    recordType: recordType;
+    createTime: string;
 }
 
-interface ChatContent {
-    id: number,
-    type: 'image' | 'text';
-    imageUrl?: string;
-    text?: string;
-    time: string;
-    userInfo: ChatUser;
+// 聊天记录
+interface ChatData extends Record{
+    user: User;
 }
 
 interface Props {
-    chatContent: ChatContent[];
+    chatContent: ChatData[];
     themeMode: 'dark' | 'light';
-    userId: number
+    qoNum: string
 }
 
 const props = defineProps<Props>()
 const emits = defineEmits<{
-    (name: 'clickAvatar', content: ChatContent): void,
+    (name: 'clickAvatar', content: ChatData): void,
     (name: 'loadMore'): void
 }>()
 
@@ -87,6 +101,8 @@ const onChatBoxScroll = (event: any) => {
 
 // 监听消息，滚动一定距离
 watch(() => props.chatContent, (before, after) => {
+    // 防止轮询触发
+    if ((JSON.stringify(before) === JSON.stringify(after)) && !isLoading.value) return
     // 滚动条总高度（新数据加载前）
     const oldScrollHeight = chatBoxRef.value.scrollHeight
     // 滚动条距离顶部（新数据加载前）
@@ -99,19 +115,18 @@ watch(() => props.chatContent, (before, after) => {
         // 滚动条总高度（新数据加载后）
         const newScrollHeight = chatBoxRef.value.scrollHeight
         // 是否为向上加载更多数据
-        if (before[0] !== after[0]) {
+        if (isLoading.value) {
             if (newScrollHeight === oldScrollHeight) haveMore.value = false
             chatBoxRef.value.scrollTo({
                 top: newScrollHeight - oldScrollHeight
             })
             isLoading.value = false
         } else {
-            // 判断是否是自己发送的消息
-            if (after.at(-1)?.userInfo.userId === props.userId) {
+            // 判断是否是自己发送的消息（用户为自己）
+            if ((props.chatContent.at(-1)?.user.qoNum === props.qoNum) || scrollBottom <= 10) {
                 // 滚动到最底部
                 toBottom(true)
             } else {
-                // 指数函数计算向下滚动高度
                 const addHeight = newScrollHeight - (scrollTop + clientHeight)
                 chatBoxRef.value.scrollBy({
                     top: scrollBottom < 1000 ? Math.pow(0.9, scrollBottom / 20) * addHeight : 0,
@@ -139,6 +154,7 @@ const startUpdateInterval = () => {
 
 // 滚动到底部（滚动条总高度 - 显示区域高度）
 const toBottom = (isSmooth: boolean) => {
+    console.log('到底部')
     chatBoxRef.value.scrollBy({ 
         top: chatBoxRef.value.scrollHeight - chatBoxRef.value.clientHeight,
         behavior: isSmooth ? 'smooth': 'auto'
@@ -190,7 +206,7 @@ const loadMore = () => {
                  v-motion
                  :initial="{
                     opacity: 0,
-                    x: props.userId === chatItem.userInfo.userId ? 100: -100
+                    x: props.qoNum === chatItem.user.qoNum ? 100: -100
                 }"
                  :enter="{
                     opacity: 1,
@@ -201,26 +217,26 @@ const loadMore = () => {
                     }
                 }"
                  :class="{
-                    'self-msg': props.userId === chatItem.userInfo.userId
+                    'self-msg': props.qoNum === chatItem.user.qoNum
                 }"
-                 :key="chatItem.id">
-                <div class="chat-row-time" v-if="isShowTime(chatItem.time, props.chatContent[index - 1]?.time)">
+                 :key="chatItem.recordId">
+                <div class="chat-row-time" v-if="isShowTime(chatItem.createTime, props.chatContent[index - 1]?.createTime)">
                     <!--相对时间时动态刷新-->
-                    <span :key="isShowAbs(chatItem.time) ? undefined: chatTimeKey">
-                        {{ handlerTime(chatItem.time) }}
+                    <span :key="isShowAbs(chatItem.createTime) ? undefined: chatTimeKey">
+                        {{ handlerTime(chatItem.createTime) }}
                     </span>
                 </div>
                 <div class="chat-row-head">
-                    <img class="chat-row-avatar hover-avatar" :src="chatItem.userInfo.avatar" alt="">
-                    <span class="chat-row-nickname">{{ chatItem.userInfo.nickname }}</span>
+                    <img class="chat-row-avatar hover-avatar" :src="chatItem.user.avatar" alt="">
+                    <span class="chat-row-nickname">{{ chatItem.user.nickname }}</span>
                 </div>
                 <div class="chat-row-content">
-                    <img :src="chatItem.userInfo.avatar"
+                    <img :src="chatItem.user.avatar"
                          class="chat-row-avatar hover-avatar"
                          @click="emits('clickAvatar', { ...chatItem })"
                          alt="">
-                    <img v-if="chatItem.type==='image'" :src="chatItem.userInfo.avatar" class="max-w-[200px]" alt="">
-                    <p v-else-if="chatItem.type==='text'" class="chat-row-text">{{ chatItem.text }}</p>
+                    <img v-if="chatItem.recordType==='image'" :src="chatItem.recordContent" class="max-w-[200px]" alt="">
+                    <p v-else-if="chatItem.recordType==='text'" class="chat-row-text">{{ chatItem.recordContent }}</p>
                     <span class="chat-row-avatar"/>
                 </div>
             </div>

@@ -1,6 +1,13 @@
 <script setup lang='ts'>
 import { Iphone, Connection } from '@element-plus/icons-vue'
+import { useToast } from 'vue-toastification'
+
 const emit = defineEmits(['back'])
+
+const toast = useToast()
+const waitOut = () => {
+    toast.info('请等待后续开发！')
+}
 </script>
 
 <template>
@@ -46,7 +53,7 @@ const emit = defineEmits(['back'])
                     placeholder="短信验证码"
                     :prefix-icon="Connection"
                 />
-                <el-button class="ml-[10px]">获取验证码</el-button>
+                <el-button class="ml-[10px]" @click="waitOut">获取验证码</el-button>
             </div>
         </el-form-item>
         <el-form-item
@@ -64,7 +71,7 @@ const emit = defineEmits(['back'])
                     delay: 80
                 },
             }">
-            <el-button class="w-full" type="primary">登录</el-button>
+            <el-button class="w-full" type="primary" @click="waitOut">登录</el-button>
         </el-form-item>
         <el-form-item
             v-motion

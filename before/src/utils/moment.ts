@@ -121,7 +121,7 @@ const isNowYear = (time: string) => moment(time).isSame(moment(), 'year')
 // 是否显示相对：六天之内
 const isShowAbs = (time: string) => moment().diff(moment(time), 'd') > 6
 
-// 处理时间
+// 处理时间，六天内为相对，一年内省略年份
 const handlerTime = (time: string) => 
     isShowAbs(time)
     ? moment(time).format((isNowYear(time) ? '' : 'YYYY年') + 'MM月DD日 ah:mm')

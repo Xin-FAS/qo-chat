@@ -1,69 +1,76 @@
 <script setup lang='ts'>
-import { ref } from 'vue'
-import type { UserChat } from '@/constant/types';
+import { ref, onMounted } from 'vue'
+import type { GetGroupMsgResp, MessageList } from '@/constant/types';
+import { GetGroupMsg, GetMessage } from '@/axios/user';
+import { useInterval } from '@/utils/useInterval';
 
 const emits = defineEmits<{
-    (name: 'click', content: UserChat): void
+    (name: 'click', content: MessageList | GetGroupMsgResp): void
+}>()
+
+const props = defineProps<{
+    search: string
 }>()
 
 // 点击列表
-const openChat = (content: UserChat) => {
-    const { chatId } = content
-    selectListId.value = chatId
+const openChat = (content: MessageList | GetGroupMsgResp) => {
+    selectMessageId.value = (content as GetGroupMsgResp).groupNum ?? (content as MessageList).user.qoNum
     // 传递给上一个组件
     emits('click', content)
 }
 
 // 当前选中列表id
-const selectListId = ref<undefined | number>(undefined)
-
-const demoList = ref<UserChat[]>([
-    {
-        chatId: 1,
-        nickname: 'Xin1',
-        text: '啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意',
-        time: '2022-02-02T16:11:11',
-        avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-    },
-    {
-        chatId: 2,
-        nickname: 'Xin2',
-        text: '啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意',
-        time: '2022-02-02T16:11:11',
-        avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-    },
-    {
-        chatId: 3,
-        nickname: 'Xin3',
-        text: '啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意啥玩意',
-        time: '2022-02-02T16:11:11',
-        avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-    },
-])
+const selectMessageId = ref<undefined | string | number>()
+// 消息列表数据
+const msgList = ref<MessageList[]>([])
+// 群组列表
+const groupList = ref<GetGroupMsgResp[]>()
+const isLoading = ref(true)
+// 获取数据
+const getMsgList = async () => {
+    if (isLoading.value) isLoading.value = false
+    msgList.value = await GetMessage(props.search)
+    groupList.value = await GetGroupMsg()
+}
+const { startInterval, stopInterval } = useInterval(1500, getMsgList)
+onMounted(() => {
+    // 轮询获取，1秒重新获取列表
+    startInterval()
+})
 </script>
 <template>
     <!-- 消息列表 -->
-    <div class="h-full overflow-auto bg-[#e8e6e6]">
-        <div
-            class="h-[70px] px-[10px] flex items-center cursor-default hover:bg-[#cac8c7] transition-all duration-150"
+    <div class="h-full overflow-auto bg-[#e8e6e6]" v-loading="isLoading">
+        <!-- 群组 -->
+        <div class="h-[70px] px-[10px] flex items-center cursor-default hover:bg-[#cac8c7] transition-all duration-150"
             :class="{
-                'isSelected': selectListId === chatItem.chatId
-            }"
-            v-for="chatItem in demoList"
-            :key="chatItem.chatId"
-            @click="openChat({...chatItem})">
-            <el-avatar class="flex-shrink-0" :src="chatItem.avatar"/>
+                'isSelected': selectMessageId === chatItem.groupNum
+            }" v-for="chatItem in groupList" :key="chatItem.record?.recordId" @click="openChat({ ...chatItem })">
+            <el-avatar class="flex-shrink-0" shape="square" :src="chatItem?.groupAvatar" />
             <div class="ml-[10px] min-w-0">
-                    <p class="text-[14px]">{{ chatItem.nickname }}</p>
-                    <p class="text-[12px] text-ellipsis whitespace-nowrap overflow-hidden">
-                        {{ chatItem.text }}
-                    </p>
+                <p class="text-[14px]">{{ chatItem.groupName }}（群聊）</p>
+                <p class="text-[12px] text-ellipsis whitespace-nowrap overflow-hidden">
+                    {{ chatItem.record.recordType==='image'? '[图片]': chatItem.record.recordContent }}
+                </p>
+            </div>
+        </div>
+        <!-- 用户 -->
+        <div class="h-[70px] px-[10px] flex items-center cursor-default hover:bg-[#cac8c7] transition-all duration-150"
+            :class="{
+                'isSelected': selectMessageId === chatItem.user.qoNum
+            }" v-for="chatItem in msgList" :key="chatItem.record.recordId" @click="openChat({ ...chatItem })">
+            <el-avatar class="flex-shrink-0" :src="chatItem.user.avatar" />
+            <div class="ml-[10px] min-w-0">
+                <p class="text-[14px]">{{ chatItem.user.nickname }}</p>
+                <p class="text-[12px] text-ellipsis whitespace-nowrap overflow-hidden">
+                    {{ chatItem.record.recordType==='image'? '[图片]': chatItem.record.recordContent }}
+                </p>
             </div>
         </div>
     </div>
 </template>
 <style scoped lang='scss'>
-    .isSelected {
-        @apply bg-[#cac8c7];
-    }
+.isSelected {
+    @apply bg-[#cac8c7];
+}
 </style>

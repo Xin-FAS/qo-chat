@@ -14,7 +14,7 @@ import { Setting } from '@element-plus/icons-vue'
         <el-icon>
             <Setting />
         </el-icon>
-        <template #title>网站设置</template>
+        <template #title>用户设置</template>
     </el-menu-item>
 </template>
 <style scoped lang='scss'>

@@ -9,7 +9,7 @@ import CodeLogin from './code-login.vue';
 import RegisterForm from './register-form.vue';
 import ForgetForm from './forget-form.vue';
 import { getToken, clearToken } from '@/utils/handler-token' 
-import { useToast, POSITION } from 'vue-toastification'
+import { useToast } from 'vue-toastification'
 import ToastNext from './toast-next.vue'
 import { useRoute } from 'vue-router'
 
@@ -53,7 +53,6 @@ const hasTokenHandler = () => {
     // 存在token直接进入
     if (getToken()) {
         toast(ToastNext, {
-            position: POSITION.TOP_CENTER,
             timeout: 3000,
             onClose () {
                 // 弹窗结束，未跳转就清空上一个账号

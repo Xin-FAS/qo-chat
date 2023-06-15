@@ -23,3 +23,4 @@
 14. nanoid（代替uuid）
 15. axios（请求）
 16. pinyin-pro（汉字操作拼音）
+17. pinia（全局状态管理）

@@ -2,11 +2,14 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { Menu, Expand, Fold } from '@element-plus/icons-vue'
 import { Icon } from '@iconify/vue';
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import MenuMore from './menu-more.vue'
 import { useDebounce } from '@/utils/useDebounce'
+import { useUserStore } from '@/pinia/user';
 
+const userStore = useUserStore()
 const route = useRoute()
+const router = useRouter()
 // 侧边栏是否关闭
 const isCollapse = ref(true)
 // 侧边栏铺平模式
@@ -61,13 +64,13 @@ const changeCollapse = () => {
         '--el-menu-hover-bg-color': 'transparent'
     }">
         <div class="text-center mt-[40px] mb-[15px]">
-            <el-avatar shape="square" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png" />
+            <el-avatar shape="square" class="cursor-pointer" :src="userStore.user.avatar" @click="router.push('/using/chat-setting')"/>
         </div>
         <el-menu-item index="/using/chat-list">
             <el-icon>
                 <Icon icon="mdi:message-badge" />
             </el-icon>
-            <template #title>聊天列表</template>
+            <template #title>聊天</template>
         </el-menu-item>
         <el-menu-item index="/using/chat-user">
             <el-icon>
@@ -81,11 +84,11 @@ const changeCollapse = () => {
             </el-icon>
             <template #title>群组</template>
         </el-menu-item>
-        <el-menu-item index="/using/chat-gpt">
+        <el-menu-item index="/using/wait-list">
             <el-icon>
                 <Icon icon="mdi:robot-confused" />
             </el-icon>
-            <template #title>ChatGPT</template>
+            <template #title>处理</template>
         </el-menu-item>
         <MenuMore v-if="isPave"/>
         <transition
@@ -96,7 +99,7 @@ const changeCollapse = () => {
                     <el-icon>
                         <Menu />
                     </el-icon>
-                    <span>更多功能</span>
+                    <span>更多模块</span>
                 </template>
                 <MenuMore />
             </el-sub-menu>

@@ -1,0 +1,38 @@
+﻿spring:
+  datasource:
+    username: root
+    password: Alone
+    url: jdbc:mysql://XXX.X.XXX.XX:3307/qo_chat?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-init-sql: SET NAMES utf8mb4
+
+  redis:
+    port: 6380
+    host: XXX.X.XXX.XX
+    password: A_Redis
+
+  # 邮箱配置
+  mail:
+    subject: 'QO-Chat邮箱验证码'
+    host: smtp.qq.com
+    username: 1507393930@qq.com
+    password: XXXXXX
+    properties:
+      mail:
+        smtp:
+          auth: true
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-value: "1"
+      logic-not-delete-value: "0"
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.fas.dto
+
+upload:
+  url: 'C:\Users\FAS\Desktop\qo-chat\before\src\assets\cache\'
+
+

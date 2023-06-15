@@ -3,16 +3,16 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import MessageList from './message-list.vue'
 import ChatContent from '@/components/chat-content.vue'
 import { Search } from '@element-plus/icons-vue'
-import type { UserChat } from '@/constant/types'
+import type { GetGroupMsgResp, MessageList as IMessageList } from '@/constant/types'
 import { useDebounce } from '@/utils/useDebounce'
 
 // 搜索框
 const searchValue = ref('')
 // 当前打开的消息列表
-const openList = ref<UserChat | undefined>()
+const openList = ref<IMessageList | GetGroupMsgResp | undefined>()
 const chatRoomKey = ref(0)
 // 子组件点击列表
-const clickList = (content: UserChat) => {
+const clickList = (content: IMessageList | GetGroupMsgResp) => {
     console.log('点击列表', content)
     chatRoomKey.value++
     openList.value = content
@@ -57,13 +57,13 @@ const drawerModel = ref(false)
                     v-model="searchValue"
                     size="large"
                     class="ml-[10px]"
-                    placeholder="好友昵称（Enter）"
+                    placeholder="好友昵称"
                     :prefix-icon="Search"
                     clearable
                 />
             </div>
             <!-- 消息列表，绑定 -->
-            <MessageList @click="clickList"/>
+            <MessageList :search="searchValue" @click="clickList"/>
         </div>
         <!-- 聊天窗口 -->
         <transition
@@ -76,6 +76,7 @@ const drawerModel = ref(false)
                     :data="openList"
                     @click-menu="clickMenu" 
                     :is-mobile="false"
+                    :is-group="!!openList && 'groupName' in openList"
                 />
             </div>
         </transition>
@@ -87,13 +88,15 @@ const drawerModel = ref(false)
             direction="btt"
             :with-header="false"
             size="100%">
-            <div class="flex h-full">
+            <div class="flex h-full" v-if="drawerModel">
                 <ChatContent
+                    v-if="drawerModel"
                     :key="'m' + chatRoomKey"
                     :data="openList"
                     @click-menu="clickMenu"
                     @swipedown="drawerModel=false"
                     :is-mobile="true"
+                    :is-group="!!openList && 'groupName' in openList"
                 />
             </div>
         </el-drawer>
